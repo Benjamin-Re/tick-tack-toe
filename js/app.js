@@ -2,8 +2,12 @@
 const gameboardModule = (function(){
     // Gameboard as private array
     let _gameboard = ["1","2","3","4","5","6","7","8", "9"];
+    let _cellIsEditable = [true, true, true, true, true, true, true, true, true];
     let setBoard = function(index, symbol){
-        _gameboard[index]=symbol;
+        if(_cellIsEditable[index]){
+            _gameboard[index]=symbol;
+            _cellIsEditable[index]=false;
+        }
         displayControllerModule.paintGameboard();
     }
     let getBoard = function() {
@@ -62,5 +66,36 @@ const flowControlModule=(function(){
 
 flowControlModule.initializeGame();
 
+function checkForWin(symbol){
+    let currentBoard = gameboardModule.getBoard()
+    switch(symbol.repeat(3)){
+        // Horizontal
+        case currentBoard.join("").substring(0,3):
+        case currentBoard.join("").substring(3,6):
+        case currentBoard.join("").substring(6):
+        // Vertical
+        case (currentBoard[0]+currentBoard[3]+currentBoard[6]):
+        case (currentBoard[1]+currentBoard[4]+currentBoard[7]):
+        case (currentBoard[2]+currentBoard[5]+currentBoard[8]):  
+        // Diagonal
+        case (currentBoard[0]+currentBoard[4]+currentBoard[8]):
+        case (currentBoard[2]+currentBoard[4]+currentBoard[6]):  
+            console.log("Win");
+            break;    
+    }
+}
 
 
+/* W I N N I N G   C O M B I N A T I O N S
+horizontal
+X X X 4 5 6 7 8 9
+1 2 3 X X X 7 8 9
+1 2 3 4 5 6 X X X
+vertical
+X 2 3 X 5 6 X 8 9
+1 X 3 4 X 5 7 X 9
+1 2 X 4 5 X 7 8 X
+diagonal
+X 2 3 4 X 6 7 8 X
+1 2 X 4 X 6 X 8 9
+*/
