@@ -1,0 +1,12 @@
+.container {
+    width: 50vw;
+    height: 50vw;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 10px;
+}
+
+[class^="cell"]{
+    border: 3px dotted pink;
+}
