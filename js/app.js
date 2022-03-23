@@ -35,6 +35,32 @@ const displayControllerModule = (function(){
     return {paintGameboard};
 })()    
 
-// Flow control
+// Flow control module
+const flowControlModule=(function(){
+    function initializeGame() {
+        const player1 = PlayerFactory("Peter", "X");
+        const player2 = PlayerFactory("Brian", "O");
+        let activePlayer;
+        let togglePlayerFlag = true;
+        const gameboardCells = Array.from(document.querySelectorAll("[class^='cell']"));
+        for (let i = 0; i < gameboardCells.length; i++) {
+            gameboardCells[i].addEventListener("click", (event) => {
+                let index = event.currentTarget.classList.item(0).substring(4) - 1;
+                if (togglePlayerFlag) {
+                    activePlayer = player1;
+                } else {
+                    activePlayer = player2;
+                }
+                activePlayer.makeMove(index);
+                togglePlayerFlag = !togglePlayerFlag;
+            });
+        }
+    }
+    return {initializeGame};
+})()
+
+
+flowControlModule.initializeGame();
+
 
 
