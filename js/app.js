@@ -51,20 +51,21 @@ const displayControllerModule = (function () {
 // Flow control module
 const flowControlModule = (function () {
   function initializeGame() {
+    // Add Event Listeners
     const gameboardCells = Array.from(
       document.querySelectorAll("[class^='cell']")
     );
     for (let i = 0; i < gameboardCells.length; i++) {
-      gameboardCells[i].addEventListener("click", addClickListeners);
+      gameboardCells[i].addEventListener("click", _addClickListeners);
     }
   }
+  // Create Players
+  const player1 = PlayerFactory("Peter", "X");
+  const player2 = PlayerFactory("Brian", "O");
+  let activePlayer;
+  let togglePlayerFlag = true; // For switching between them
   // Event Listener Function
-  function addClickListeners(event) {
-    // Create Players
-    const player1 = PlayerFactory("Peter", "X");
-    const player2 = PlayerFactory("Brian", "O");
-    let activePlayer;
-    let togglePlayerFlag = true;
+  function _addClickListeners(event) {
     let index = event.currentTarget.classList.item(0).substring(4) - 1;
     if (togglePlayerFlag) {
       activePlayer = player1;
@@ -108,7 +109,7 @@ const flowControlModule = (function () {
       document.querySelectorAll("[class^='cell']")
     );
     for (let i = 0; i < gameboardCells.length; i++) {
-      gameboardCells[i].removeEventListener("click", addClickListeners);
+      gameboardCells[i].removeEventListener("click", _addClickListeners);
     }
   }
 
