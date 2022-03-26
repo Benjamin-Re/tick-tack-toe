@@ -1,3 +1,10 @@
+body{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height:100vh;
+}
+
 .container {
     width: 50vw;
     height: 50vw;
@@ -9,4 +16,17 @@
 
 [class^="cell"]{
     border: 3px dotted pink;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3rem;
 }
+
+.status {
+    font-family: monospace;
+}
+
+.win {
+    background-color: #FFCA2C;
+}
+
