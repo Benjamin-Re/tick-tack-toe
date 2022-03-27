@@ -3,31 +3,34 @@ const gameboardModule = (function () {
   // Gameboard as private array
   let _gameboard = [" ", " ", " ", " ", " ", " ", " ", " ", " "];
   let _cellIsEditable = [true, true, true, true, true, true, true, true, true];
-  let setBoard = function (index, symbol) {
+  const setBoard = function (index, symbol) {
     if (_cellIsEditable[index]) {
       _gameboard[index] = symbol;
       _cellIsEditable[index] = false;
     }
     displayControllerModule.paintGameboard();
   };
-  let getBoard = function () {
+  const getBoard = function () {
     // Slice is here to return a copy instead of the private variable
     return _gameboard.slice(0);
   };
-  let blockBoard = function () {
+  const blockBoard = function () {
     for (let i = 0; i < _cellIsEditable.length; i++) {
       _cellIsEditable[i] = false;
     }
   };
-  let isBlocked = function () {
+  const isBlocked = function () {
     return _cellIsEditable.every((value) => value === false);
   };
-  let resetBoard = function () {
+  const resetBoard = function () {
     _gameboard = [" ", " ", " ", " ", " ", " ", " ", " ", " "];
     _cellIsEditable = [true, true, true, true, true, true, true, true, true];
   }
-
-  return { setBoard, getBoard, blockBoard, isBlocked, resetBoard };
+  // Function to check if a particular cell is editable
+  const isEditable = function(i) {
+    return _cellIsEditable[i];
+  }
+  return { setBoard, getBoard, blockBoard, isBlocked, resetBoard, isEditable };
 })();
 
 // Player Factory
@@ -76,17 +79,34 @@ const flowControlModule = (function () {
   // For switching between them
   let activePlayer;
   let togglePlayerFlag; 
+  let AIactive = false;
+  let gameOver=false;
 
+  // Add event listener to new game button
   const newGameBtn=document.querySelector(".new-game");
   newGameBtn.addEventListener("click", _startNewGame);
 
+  // Add event listener to AI button
+  const enableAI=document.querySelector(".enable-AI");
+  enableAI.addEventListener("click", _startNewGameAgainstAI);
+
   // Start new game
   function _startNewGame(){
+    AIactive=false;
     gameboardModule.resetBoard();
     displayControllerModule.paintGameboard();
     initializeGame(prompt("name1 for X"), prompt("name2 for O"));
     displayControllerModule.displayStatus(`${activePlayer.name}'s turn`);
   }
+
+    // Start new game against AI
+    function _startNewGameAgainstAI(){
+      AIactive=true;
+      gameboardModule.resetBoard();
+      displayControllerModule.paintGameboard();
+      initializeGame(prompt("name1 for X"), "Computer");
+      displayControllerModule.displayStatus(`${activePlayer.name}'s turn`);
+    }
 
   function initializeGame(name1, name2) {
     // Initialize the players
@@ -99,12 +119,19 @@ const flowControlModule = (function () {
       document.querySelectorAll("[class^='cell']")
     );
     for (let i = 0; i < gameboardCells.length; i++) {
-      gameboardCells[i].addEventListener("click", _addClickListeners);
+      if(AIactive){
+        gameboardCells[i].addEventListener("click", _addClickListenersAI);
+      } else {
+        // Remove the AI click listeners should there be any
+        gameboardCells[i].removeEventListener("click", _addClickListenersAI)
+        gameboardCells[i].addEventListener("click", _addClickListeners);
+      }
     }
   }
 
   // Event Listener Function for Gameboard Cells
   function _addClickListeners(event) {
+    // Get the number of the cell clicked on
     let index = event.currentTarget.classList.item(0).substring(4) - 1;
     if (togglePlayerFlag) {
       activePlayer = player1;
@@ -117,33 +144,38 @@ const flowControlModule = (function () {
     togglePlayerFlag = !togglePlayerFlag;
   }
 
+  // Event Listener Function for Gameboard Cells
+  function _addClickListenersAI(event) {
+    // Get the number of the cell clicked on
+    let index = event.currentTarget.classList.item(0).substring(4) - 1;
+    player1.makeMove(index);
+    // Computer makes a move after the player if the game is not won by the last move
+    if(!gameOver){
+      let computedIndex = AiModule.computeIndex();
+      player2.makeMove(computedIndex);
+    } else {
+      gameOver=!gameOver;
+    }
+  }
+
   // Check if a player won
   function checkForWin(player) {
     let currentBoard = gameboardModule.getBoard();
-    console.log(currentBoard);
-    console.log(currentBoard.join("").substring(6, 8));
     let winner;
     switch (player.symbol.repeat(3)) {
       // Horizontal
       case currentBoard.join("").substring(0, 3):
-
       case currentBoard.join("").substring(3, 6):
-
       case currentBoard.join("").substring(6, 9):
-
       // Vertical
       case currentBoard[0] + currentBoard[3] + currentBoard[6]:
-
       case currentBoard[1] + currentBoard[4] + currentBoard[7]:
-
       case currentBoard[2] + currentBoard[5] + currentBoard[8]:
-
       // Diagonal
       case currentBoard[0] + currentBoard[4] + currentBoard[8]:
-
       case currentBoard[2] + currentBoard[4] + currentBoard[6]:
-
         winner = player.symbol;
+        gameOver=true;
         _stopGame(player.name+" with "+player.symbol + " wins! 👑");
         return;
     }
@@ -174,6 +206,31 @@ const flowControlModule = (function () {
   })
   return { initializeGame, checkForWin };
 })();
+
+const AiModule = (function(){
+  const computeIndex = function(){
+    let currentBoard = gameboardModule.getBoard();
+    for(let i = 0; i < currentBoard.length; i++){
+      if(gameboardModule.isEditable(i)){
+        return i;
+      }
+    }
+  }
+  
+  const computeSmartIndex = function(){
+    // Try to get one of the winning combinations down
+    if(gameboardModule.isEditable(0)){
+      return 0;
+    }
+    if(gameboardModule.isEditable(1)){
+      return 1;
+    }
+    if(gameboardModule.isEditable(2)){
+      return 2;
+    }
+  }
+  return {computeIndex, computeSmartIndex};
+})()
 
 /* W I N N I N G   C O M B I N A T I O N S
 horizontal

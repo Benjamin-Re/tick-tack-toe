@@ -1,1 +1,6 @@
 temp.js
+cypress.json
+cypress/
+node_modules/
+package-lock.json
+package.json
